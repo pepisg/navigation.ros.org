@@ -56,10 +56,10 @@ What is Semantic Segmentation?
 
 Semantic segmentation is a computer vision task that assigns a class label to every pixel in an image. Unlike object detection, which identifies and localizes objects with bounding boxes, semantic segmentation provides pixel-level understanding of the scene.
 
-Modern semantic segmentation is typically solved using deep learning, specifically convolutional neural networks (CNNs) or vision transformers. These models are trained on large datasets of images where each pixel has been labeled with its corresponding class. 
+Modern semantic segmentation is typically solved using deep learning, specifically convolutional neural networks (CNNs) or vision transformers. These models are trained on large datasets of images where each pixel has been labeled with its corresponding class.
 During training, the model learns to recognize patterns and features that distinguish different classes (e.g., the texture of grass vs. the smooth surface of a sidewalk). Common architectures include U-Net, DDRNet, and SegFormer.
 
-As said above, a pretrained model is included in this tutorial, so you can skip the training part and go directly to the integration with Nav2. 
+As said above, a pretrained model is included in this tutorial, so you can skip the training part and go directly to the integration with Nav2.
 However, if you want to train your own model, you can use the `Simple Segmentation Toolkit <https://github.com/pepisg/simple_segmentation_toolkit>`_ to easily prototype one with SAM-based auto-labeling (no manual annotation required).
 
 .. image:: images/Navigation2_with_segmentation/segmentation_example.png
@@ -67,11 +67,11 @@ However, if you want to train your own model, you can use the `Simple Segmentati
     :align: center
     :alt: Example of semantic segmentation showing original image and segmented mask
 
-Once trained, the output of a semantic segmentation model is typically an image with the same size as the input, where each pixel holds the probability of that pixel belonging to each class. 
+Once trained, the output of a semantic segmentation model is typically an image with the same size as the input, where each pixel holds the probability of that pixel belonging to each class.
 For instance, the model provided in this tutorial has 3 classes: sidewalk, grass, and background; hence its raw output is a 3-channel image, where each channel corresponds to the probability of the pixel belonging to that class.
-At the end, the class with the highest probability is selected for each pixel, and a confidence value is calculated as the probability of the class that was selected. 
+At the end, the class with the highest probability is selected for each pixel, and a confidence value is calculated as the probability of the class that was selected.
 
-A perfectly working model should have a confidence value of 1 for the class that was selected, and 0 for the other classes; however, this is rarely the case. Pixels with lower confidence usually correspond to classifications that may be wrong. 
+A perfectly working model should have a confidence value of 1 for the class that was selected, and 0 for the other classes; however, this is rarely the case. Pixels with lower confidence usually correspond to classifications that may be wrong.
 For that reason, both the class and the confidence are important inputs for deciding how to assign a cost to a pixel, and both are taken into account by the semantic segmentation layer. You can refer to its `README <https://github.com/kiwicampus/semantic_segmentation_layer>`_ for a detailed explanation on how this is done.
 
 
@@ -110,7 +110,7 @@ You should see Gazebo launch with the TurtleBot 4 in the Baylands world.
 -----------------------------------------------
 
 The semantic segmentation node performs real-time inference on camera images using an ONNX model. It subscribes to camera images, runs inference, and publishes segmentation masks, confidence maps, and label information.
-To run the semantic segmentation node, you need to install the dependencies from the `requirements.txt <https://github.com/ros-navigation/navigation2_tutorials/blob/master/nav2_semantic_segmentation_demo/semantic_segmentation_node/requirements.txt>`_ file in the semantic_segmentation_node package: 
+To run the semantic segmentation node, you need to install the dependencies from the `requirements.txt <https://github.com/ros-navigation/navigation2_tutorials/blob/master/nav2_semantic_segmentation_demo/semantic_segmentation_node/requirements.txt>`_ file in the semantic_segmentation_node package:
 
 .. code-block:: bash
 
@@ -132,7 +132,7 @@ An example configuration file (`config/ontology.yaml`):
          color: [255, 0, 0]  # BGR format
        - name: grass
          color: [0, 255, 0]  # BGR format
-   
+
    model:
      device: cpu  # cuda or cpu
 
@@ -219,14 +219,14 @@ The Baylands simulation and `rviz` should appear. You should be able to send nav
     :width: 90%
     :align: center
 
-To better see what the plugin is doing, you can enable the segmentation tile map visualization in `rviz`. This will show a pointcloud of the segmentation observations for each tile, colored by their confidence. 
+To better see what the plugin is doing, you can enable the segmentation tile map visualization in `rviz`. This will show a pointcloud of the segmentation observations for each tile, colored by their confidence.
 Again, you can refer to the picture on the Layer's `README <https://github.com/kiwicampus/semantic_segmentation_layer>`_ for a visual explanation of how observations are accumulated on the costmap tiles and how that translates to the cost assigned to each tile.
 
 .. image:: images/Navigation2_with_segmentation/tile_map.gif
     :width: 90%
     :align: center
 
-**IMPORTANT NOTE:** For the sake of simplicity, this tutorial publishes a static trasform between the ``map`` and ``odom`` frames. In a real-world application, you should have a proper localization system (e.g. GPS) to get the ``map`` => ``odom`` transform.
+**IMPORTANT NOTE:** For the sake of simplicity, this tutorial publishes a static transform between the ``map`` and ``odom`` frames. In a real-world application, you should have a proper localization system (e.g. GPS) to get the ``map`` => ``odom`` transform.
 
 Conclusion
 ==========
@@ -236,4 +236,3 @@ This tutorial demonstrated how to integrate semantic segmentation with Nav2 for 
 To go further, you can train your own model using the `Simple Segmentation Toolkit <https://github.com/pepisg/simple_segmentation_toolkit>`_, and tune the costmap parameters to your own application.
 
 Happy terrain-aware navigating!
-
