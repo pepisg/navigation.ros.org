@@ -226,7 +226,7 @@ Again, you can refer to the picture on the Layer's `README <https://github.com/k
     :width: 90%
     :align: center
 
-
+**IMPORTANT NOTE:** For the sake of simplicity, this tutorial publishes a static trasform between the ``map`` and ``odom`` frames. In a real-world application, you should have a proper localization system (e.g. GPS) to get the ``map`` => ``odom`` transform.
 
 Conclusion
 ==========
