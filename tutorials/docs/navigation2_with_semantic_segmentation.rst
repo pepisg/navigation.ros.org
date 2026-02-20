@@ -12,7 +12,7 @@ Navigating with Semantic Segmentation
 Overview
 ========
 
-This tutorial demonstrates how to use semantic segmentation in costmaps with stereo cameras, using a custom `semantic_segmentation_layer plugin <https://github.com/ros-navigation/navigation2_tutorials/tree/master/nav2_semantic_segmentation_layer>`_ and a pre-trained segmentation model that works on Gazebo's Baylands world. It was written by Pedro Gonzalez at `robot.com <https://robot.com/>`_.
+This tutorial demonstrates how to use semantic segmentation in costmaps with stereo cameras, using a custom `semantic_segmentation_layer plugin <https://github.com/kiwicampus/semantic_segmentation_layer>`_ and a pre-trained segmentation model that works on Gazebo's Baylands world. It was written by Pedro Gonzalez at `robot.com <https://robot.com/>`_.
 
 .. image:: images/Navigation2_with_segmentation/video.gif
     :width: 90%
