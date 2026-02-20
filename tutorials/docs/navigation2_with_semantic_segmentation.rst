@@ -1,7 +1,7 @@
 .. _navigation2_with_semantic_segmentation:
 
 Navigating with Semantic Segmentation
-**************************************
+*************************************
 
 - `Overview`_
 - `Requirements`_
