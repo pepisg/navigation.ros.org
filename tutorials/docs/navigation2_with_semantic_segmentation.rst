@@ -9,14 +9,14 @@ Navigating with Semantic Segmentation
 - `Tutorial Steps`_
 - `Conclusion`_
 
-.. image:: images/Navigation2_with_segmentation/video.gif
-    :width: 90%
-    :align: center
-
 Overview
 ========
 
-This tutorial demonstrates how to use semantic segmentation in costmaps with nav2, using a custom `semantic_segmentation_layer plugin <https://github.com/ros-navigation/navigation2_tutorials/tree/master/nav2_semantic_segmentation_layer>`_ and a pre-trained segmentation model that works on gazebo's Baylands world. It was written by Pedro Gonzalez at `robot.com <https://robot.com/>`_.
+This tutorial demonstrates how to use semantic segmentation in costmaps with stereo cameras, using a custom `semantic_segmentation_layer plugin <https://github.com/ros-navigation/navigation2_tutorials/tree/master/nav2_semantic_segmentation_layer>`_ and a pre-trained segmentation model that works on Gazebo's Baylands world. It was written by Pedro Gonzalez at `robot.com <https://robot.com/>`_.
+
+.. image:: images/Navigation2_with_segmentation/video.gif
+    :width: 90%
+    :align: center
 
 Requirements
 ============
@@ -30,16 +30,16 @@ It is assumed ROS2 and Nav2 dependent packages are installed or built locally. A
    sudo apt install ros-$ROS_DISTRO-ros-gz-sim
    sudo apt install ros-$ROS_DISTRO-ros-gz-interfaces
 
-You will also need to compile the semantic_segmentation_layer package. To do it, clone the repo to your ros2 workspace source, checkout to the appropriate branch and build the package:
+You will also need to compile the semantic_segmentation_layer package. To do it, clone the repo to your ROS 2 workspace source, checkout to the appropriate branch and build the package:
 
 .. code-block:: bash
 
-   # on your workspace source replace rolling with your ros distro. branches are available for humble, jazzy and rolling.
+   # on your workspace source replace rolling with your ROS distro. branches are available for humble, jazzy and rolling.
    git clone -b rolling https://github.com/kiwicampus/semantic_segmentation_layer.git
    cd <your workspace path>
    colcon build --symlink-install # on your workspace path
 
-The code for this tutorial is hosted in the `nav2_semantic_segmentation_demo <https://github.com/ros-navigation/navigation2_tutorials/tree/master/nav2_semantic_segmentation_demo>`_ package. It's highly recommended that you clone and build this package when setting up your development environment.
+The code for this tutorial is hosted in the `nav2_semantic_segmentation_demo <https://github.com/ros-navigation/navigation2_tutorials/tree/master/nav2_semantic_segmentation_demo>`_ directory. It's highly recommended that you clone and build these packages when setting up your development environment.
 
 Finally, you will need:
 
@@ -47,6 +47,8 @@ Finally, you will need:
 - **OpenCV**: For image processing
 
 We will install these through the tutorial.
+
+NOTE: The semantic segmentation layer plugin is currently only compatible with stereo cameras that produce aligned depth and color images.
 
 Semantic Segmentation Overview
 ==============================
@@ -59,7 +61,7 @@ Semantic segmentation is a computer vision task that assigns a class label to ev
 Modern semantic segmentation is typically solved using deep learning, specifically convolutional neural networks (CNNs) or vision transformers. These models are trained on large datasets of images where each pixel has been labeled with its corresponding class.
 During training, the model learns to recognize patterns and features that distinguish different classes (e.g., the texture of grass vs. the smooth surface of a sidewalk). Common architectures include U-Net, DDRNet, and SegFormer.
 
-As said above, a pretrained model is included in this tutorial, so you can skip the training part and go directly to the integration with Nav2.
+As said above, a pre-trained model is included in this tutorial, so you can skip the training part and go directly to the integration with Nav2.
 However, if you want to train your own model, you can use the `Simple Segmentation Toolkit <https://github.com/pepisg/simple_segmentation_toolkit>`_ to easily prototype one with SAM-based auto-labeling (no manual annotation required).
 
 .. image:: images/Navigation2_with_segmentation/segmentation_example.png
@@ -68,8 +70,9 @@ However, if you want to train your own model, you can use the `Simple Segmentati
     :alt: Example of semantic segmentation showing original image and segmented mask
 
 Once trained, the output of a semantic segmentation model is typically an image with the same size as the input, where each pixel holds the probability of that pixel belonging to each class.
-For instance, the model provided in this tutorial has 3 classes: sidewalk, grass, and background; hence its raw output is a 3-channel image, where each channel corresponds to the probability of the pixel belonging to that class.
-At the end, the class with the highest probability is selected for each pixel, and a confidence value is calculated as the probability of the class that was selected.
+For instance, the model provided in this tutorial has 3 classes: sidewalk, grass, and background; hence its raw output is a 3-channel tensor, where each channel corresponds to the probability of the pixel belonging to that class.
+Note that a model with more classes (ex: 100 classes) would output a 100-channel tensor. At the end, the class with the highest probability is selected for each pixel, and a confidence value is calculated as the probability of the class that was selected.
+That logic is usually performed downstream the inference itself, and in this tutorial it is performed by a ROS2 semantic segmentation node.
 
 A perfectly working model should have a confidence value of 1 for the class that was selected, and 0 for the other classes; however, this is rarely the case. Pixels with lower confidence usually correspond to classifications that may be wrong.
 For that reason, both the class and the confidence are important inputs for deciding how to assign a cost to a pixel, and both are taken into account by the semantic segmentation layer. You can refer to its `README <https://github.com/kiwicampus/semantic_segmentation_layer>`_ for a detailed explanation on how this is done.
@@ -82,14 +85,14 @@ Tutorial Steps
 -------------------------------
 
 To navigate using semantic segmentation, we first need to set up a simulation environment with a robot equipped with a camera sensor. For this tutorial, we will use the Baylands outdoor world in Gazebo with a TurtleBot 4 robot.
-Everything is already set up in the `nav2_semantic_segmentation_demo <https://github.com/ros-navigation/navigation2_tutorials/tree/master/nav2_semantic_segmentation_demo>`_ package, so clone the repo and build it if you haven't already:
+Everything is already set up in the `nav2_semantic_segmentation_demo <https://github.com/ros-navigation/navigation2_tutorials/tree/master/nav2_semantic_segmentation_demo>`_ directory, so clone the repo and build it if you haven't already:
 
 .. code-block:: bash
 
    # On your workspace source folder
    git clone https://github.com/ros-navigation/navigation2_tutorials.git
    cd <your workspace path>
-   colcon build --symlink-install --packages-up-to nav2_semantic_segmentation_demo
+   colcon build --symlink-install --packages-up-to semantic_segmentation_sim
 
    source install/setup.bash
 
@@ -120,7 +123,7 @@ To run the semantic segmentation node, you need to install the dependencies from
 The segmentation node is configured through an ontology YAML file that defines:
 
 - **Classes to detect**: Each class has a name and color for visualization. Classes should be defined in the same order as the model output. 0 is always the background class.
-- **Model settings**: Device (CPU/CUDA), image preprocessing parameters. We use the CPU for inference for greater compatibility; however, if you have a GPU you can install onnxruntime-gpu and set the device to cuda.
+- **Model settings**: Device (CPU/CUDA), image preprocessing parameters. We use the CPU for inference for greater compatibility; however, if you have a GPU you can install `onnxruntime-gpu <https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html#requirements>`_ and its dependencies according to your hardware, and set the device to cuda.
 
 An example configuration file (`config/ontology.yaml`):
 
@@ -167,6 +170,8 @@ Now we need to configure Nav2 to use the semantic segmentation layer in its cost
 - **Class Types**: Defines terrain categories (traversable, intermediate, danger)
 - **Cost Assignment**: Maps semantic classes to navigation costs
 - **Temporal Parameters**: Controls how long observations persist in the costmap
+
+Currently, the costmap plugin works only with pointclouds from a stereo camera, which are aligned to the color image and thus with the segmentation mask.
 
 Here's an example configuration for the local costmap:
 
@@ -231,7 +236,7 @@ Again, you can refer to the picture on the Layer's `README <https://github.com/k
 Conclusion
 ==========
 
-This tutorial demonstrated how to integrate semantic segmentation with Nav2 for terrain-aware navigation using a pretrained model that works on Gazebo's Baylands world and a custom semantic segmentation layer plugin.
+This tutorial demonstrated how to integrate semantic segmentation with Nav2 for terrain-aware navigation using a pre-trained model that works on Gazebo's Baylands world and a custom semantic segmentation layer plugin.
 
 To go further, you can train your own model using the `Simple Segmentation Toolkit <https://github.com/pepisg/simple_segmentation_toolkit>`_, and tune the costmap parameters to your own application.
 
