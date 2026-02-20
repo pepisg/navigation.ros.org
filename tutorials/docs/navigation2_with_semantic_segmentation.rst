@@ -48,7 +48,7 @@ Finally, you will need:
 
 We will install these through the tutorial.
 
-NOTE: The semantic segmentation layer plugin is currently only compatible with stereo cameras that produce aligned depth and color images.
+NOTE: The semantic segmentation layer plugin is currently requires the depth and color images to be fully aligned, such as those from stereo or depth cameras. However, AI-based depth estimators may be used to create depth from monocular cameras.
 
 Semantic Segmentation Overview
 ==============================
