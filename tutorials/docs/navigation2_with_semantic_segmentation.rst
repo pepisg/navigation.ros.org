@@ -110,7 +110,7 @@ You should see Gazebo launch with the TurtleBot 4 in the Baylands world.
     :alt: Gazebo Baylands world
 
 1- Setup Semantic Segmentation Inference Node
------------------------------------------------
+---------------------------------------------
 
 The semantic segmentation node performs real-time inference on camera images using an ONNX model. It subscribes to camera images, runs inference, and publishes segmentation masks, confidence maps, and label information.
 To run the semantic segmentation node, you need to install the dependencies from the `requirements.txt <https://github.com/ros-navigation/navigation2_tutorials/blob/master/nav2_semantic_segmentation_demo/semantic_segmentation_node/requirements.txt>`_ file in the semantic_segmentation_node package:
