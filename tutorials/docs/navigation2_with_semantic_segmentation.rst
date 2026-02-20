@@ -210,7 +210,7 @@ Here's an example configuration for the local costmap:
 The tutorial provides a pre-configured `nav2_params.yaml <https://github.com/ros-navigation/navigation2_tutorials/blob/master/nav2_semantic_segmentation_demo/semantic_segmentation_sim/config/nav2_params.yaml>`_ file in the semantic_segmentation_sim package. You can use it to configure the Nav2 costmaps for your own application.
 
 3- Run everything together
-----------------------------
+--------------------------
 
 The tutorial provides a complete launch file that launches the simulation, the semantic segmentation node, and the Nav2 navigation stack. To run it, simply launch the `segmentation_simulation_launch.py <https://github.com/ros-navigation/navigation2_tutorials/blob/master/nav2_semantic_segmentation_demo/semantic_segmentation_sim/launch/segmentation_simulation_launch.py>`_ file:
 
